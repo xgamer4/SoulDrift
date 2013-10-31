@@ -15,32 +15,28 @@ else:
 pygame.init()
 
 characters = []
-components = ["ai", "render"]
+components = ["ai"]
 
 sprites = pygame.sprite.Group()
 
-rendering = RenderingSystem(sprites)
-messaging = MessagingSystem()
+config = ConfigSystem()
+rendering = RenderingSystem(config, sprites)
 
-
-player = Entity()
+player = Entity(rendering.getSprite(1,5), pygame.Rect((16,16), (16,16)))
 characters.append(player)
 
 
-player.updateComponent("render", RenderableComponent(rendering.getSprite(1, 5), pygame.Rect( (0,0), (16,16) )))
+rendering.add2SpriteList(player)
 
-rendering.add2SpriteList(player.getComponent("render"))
+player.updateComponent(PlayerAIComponent.name, PlayerAIComponent(player))
+player.updateComponent(MonsterCollisionComponent.name, MonsterCollisionComponent())
 
-player.updateComponent("ai", PlayerAIComponent(player))
-player = player.getComponent("ai")
-
-
-zero = Entity()
+zero = Entity(rendering.getSprite(4,1), pygame.Rect((32, 32), (16,16)))
 characters.append(zero)
-zero.updateComponent("render", RenderableComponent(rendering.getSprite(4,1), pygame.Rect((16,16), (16,16)))) 
-zero.updateComponent("ai", AIComponent())
+zero.updateComponent(AIComponent.name, AIComponent())
+zero.updateComponent(MonsterCollisionComponent.name, MonsterCollisionComponent())
 
-rendering.add2SpriteList(zero.getComponent("render"))
+rendering.add2SpriteList(zero)
 
 pygame.event.set_blocked(MOUSEMOTION)
 pygame.event.post(pygame.event.Event(USEREVENT, {"start": 1}))
@@ -50,6 +46,7 @@ dy = 0
 
 physics = PhysicsSystem(sprites)
 
+rendering.createBorder()
 rendering.render()
 
 while 1:
@@ -69,13 +66,11 @@ while 1:
             elif event.key == K_LEFT:
                 dx = -16
                 dy = 0
-            player.setMovement(dx, dy)
+            player.getComponent("ai").setMovement(dx, dy)
 
-            for component in components:
-                for character in characters:
-                    componentRef = character.getComponent(component)
-                    componentRef.processMessages()
-                    messaging.process(character, component)
-                    componentRef.update()
-
+            for character in characters:
+                character.getComponent("ai").update()
+                character.update()
+                physics.handleCollisions(character)
+                
             rendering.render()
