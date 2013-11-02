@@ -1,8 +1,14 @@
 #!/usr/bin/python
+
+import sys
+sys.path.insert(1, 'Components')
+
 import pygame
 from pygame.locals import *
 import platform
-from Components import *
+from BaseComponents import Entity
+from AIComponents import *
+from CollisionComponents import *
 from Systems import *
 
 os = platform.system()

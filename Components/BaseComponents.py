@@ -1,21 +1,6 @@
-import pygame
+from pygame import sprite
 import math
 import random
-
-########################
-### MESSAGING FORMAT ###
-###   (TENTATIVE)    ###
-########################
-
-### Tuple
-# Index 0: Instruction (int)
-#     Value 1: Update component-level variable (update function, etc)
-#     Value 2: Update scratch-variables (dict containing variables that can be edit/set by messages)
-#     Value 3: Request for information (send a message containing contents of requested variable; currently only supports requests for scratch-variables)
-#  Value 4: Response to request
-# Index 1: Name of variable to be updated (1,2), sent (3), or received (4)
-# Index 2: Value to set variable to (1,2), value is set to (4), or ignore (3)
-###
 
 
 ### List of Components
@@ -29,7 +14,7 @@ import random
 # 8) MAY BE ADDED AS NEED ARISES
 ### 
 
-class Entity(pygame.sprite.Sprite):
+class Entity(sprite.Sprite):
     entityTotal = 0
     
     def __init__(self):
@@ -41,7 +26,7 @@ class Entity(pygame.sprite.Sprite):
         self.rect = rect
         
     def startup(self):
-        pygame.sprite.Sprite.__init__(self)
+        sprite.Sprite.__init__(self)
         Entity.entityTotal = Entity.entityTotal + 1
         self.ID = Entity.entityTotal
         
@@ -116,26 +101,7 @@ class AIComponent(Component):
     def movement(self):
         self.owner.dx = self.dx
         self.owner.dy = self.dy
-
-
-class PlayerAIComponent(AIComponent):
-    
-    def __init__(self, playerEntity):
-        AIComponent.__init__(self)
-        self.playerEntity = playerEntity
-
-    def setMovement(self, dx, dy):
-        self.dx = dx
-        self.dy = dy
-        self.movement()
-
-    def update(self):
-        return None
-
-class MonsterAIComponent(AIComponent):
-    
-    def __init__(self):
-        AIComponent.__init__(self)
+        
         
 class CollisionComponent(Component):
     
@@ -148,22 +114,3 @@ class CollisionComponent(Component):
         
     def collide(self, colliderEntity):
         raise NotImplementedError()
-    
-class BorderCollisionComponent(CollisionComponent):
-    
-    def __init__(self):
-        CollisionComponent.__init__(self)
-        self.react = False
-        
-    def collide(self, colliderEntity):
-        return None
-
-class MonsterCollisionComponent(CollisionComponent):
-    
-    def __init__(self):
-        CollisionComponent.__init__(self)
-        
-    def collide(self, colliderEntity):
-        print str(self.owner.ID) + " Collision!"
-    
-        

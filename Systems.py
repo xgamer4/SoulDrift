@@ -97,6 +97,9 @@ class PhysicsSystem:
         for item in colliders:
             if (item.getComponent("collision").passthrough == False and not undoneMove):
                 sprite.undoMove()
-            item.getComponent("collision").collide(sprite)
-            sprite.getComponent("collision").collide(item)
+                undoneMove = True
+            if item.getComponent("collision").react:
+                item.getComponent("collision").collide(sprite)
+            if sprite.getComponent("collision").react:
+                sprite.getComponent("collision").collide(item)
             
