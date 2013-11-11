@@ -4,40 +4,49 @@ import random
 
 
 ### List of Components
-# 1) Renderable Component - individual sprite/image and location
-# 2) AI Component - Actions taken by the entity
-# 3) Stat Component - HP, MP, Strength, etc
-# 4) Inventory Component - Carried equipment
-# 5) Ability Components - 0+ components that determine special abilities (breath fire, etc)
-# 6) Interact Component - Describes the behavior when one entity interacts with a second
-# 7) Overlap Component - Describes the behavior when two entities overlap
-# 8) MAY BE ADDED AS NEED ARISES
+# 1) AI Component - Actions taken by the entity
+# 2) Stat Component - HP, Strength, etc
+# 3) Inventory Component - Carried equipment
+# 4) Ability Components - 0+ components that determine special abilities (breath fire, etc)
+# 5) Interact Component - Describes the behavior when one entity interacts with a second
+# 6) Overlap Component - Describes the behavior when two entities overlap
+# MAY BE ADDED AS NEED ARISES
 ### 
 
 class Entity(sprite.Sprite):
     entityTotal = 0
     
-    def __init__(self):
-        self.startup()
+    def __init__(self, logger):
+        self.startup(logger)
         
-    def __init__(self, image, rect):
-        self.startup()
+    def __init__(self, logger, image, rect):
+        self.startup(logger)
         self.image = image
         self.rect = rect
         
-    def startup(self):
+    def startup(self, logger):
         sprite.Sprite.__init__(self)
         Entity.entityTotal = Entity.entityTotal + 1
         self.ID = Entity.entityTotal
         
-        self.components = {}    
+        self.logger = logger
+        
+        self.components = {}   
+        self.components[AbilityComponent.name] = {}
+        self.abilityIDs = []
         
         self.dx = 0
-        self.dy = 0
-           
+        self.dy = 0           
         
     def updateComponent(self, key, component):
-        self.components[key] = component
+        if key == AbilityComponent.name:
+            for replace in component.replaceIDs:
+                if replace in abilityIDs:
+                    self.abilityIDs.remove(replace)
+                    del self.components[AbilityComponent.name][replace]
+            self.components[key][component.ID] = component
+        else:
+            self.components[key] = component
         component.owner = self
         
     def deleteComponent(self, key):
@@ -54,6 +63,9 @@ class Entity(sprite.Sprite):
         
     def undoMove(self):
         self.rect.move_ip(-self.dx, -self.dy)
+        
+    def logMessage(self, message):
+        self.logger.messageLog.append(message)
 
 
 class Component:
@@ -114,3 +126,22 @@ class CollisionComponent(Component):
         
     def collide(self, colliderEntity):
         raise NotImplementedError()
+    
+class StatComponent(Component):
+    
+    name = "stat"
+    
+    def __init__(self):
+        self.stats = {}
+        self.stats["HP"] = 10
+        self.stats["Max HP"] = 10
+        self.stats["Strength"] = 2
+        self.stats["Defense"] = 1
+        
+
+class AbilityComponent:
+    
+    name = "ability"
+    
+    def __init__(self):
+        self.ID = 0

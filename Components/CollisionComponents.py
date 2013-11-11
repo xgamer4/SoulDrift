@@ -15,5 +15,4 @@ class MonsterCollisionComponent(CollisionComponent):
         CollisionComponent.__init__(self)
         
     def collide(self, colliderEntity):
-        #print str(self.owner.ID) + " Collision with " + str(colliderEntity.ID)
-        return None
+        print str(self.owner.ID) + " Collision with " + str(colliderEntity.ID)

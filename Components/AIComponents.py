@@ -18,4 +18,12 @@ class MonsterAIComponent(AIComponent):
     
     def __init__(self):
         AIComponent.__init__(self)
+        
+class DummyAIComponent(AIComponent):
+    
+    def __init__self(self):
+        AIComponent.__init__(self)
+        
+    def update(self):
+        return None
     

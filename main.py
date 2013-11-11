@@ -19,6 +19,7 @@ else:
 
     
 pygame.init()
+clock = pygame.time.Clock()
 
 characters = []
 components = ["ai"]
@@ -26,21 +27,25 @@ components = ["ai"]
 sprites = pygame.sprite.Group()
 
 config = ConfigSystem()
-rendering = RenderingSystem(config, sprites)
+logger = LoggingSystem()
+rendering = RenderingSystem(config, logger, sprites)
 
-player = Entity(rendering.getSprite(1,5), pygame.Rect((16,16), (16,16)))
+player = Entity(logger, rendering.getSprite(1,5), pygame.Rect((16,16), (16,16)))
 characters.append(player)
 
+player.logMessage( ((0,0,0), "I'm the player!"))
 
 rendering.add2SpriteList(player)
 
 player.updateComponent(PlayerAIComponent.name, PlayerAIComponent(player))
 player.updateComponent(MonsterCollisionComponent.name, MonsterCollisionComponent())
+player.updateComponent(StatComponent.name, StatComponent())
 
-zero = Entity(rendering.getSprite(4,1), pygame.Rect((32, 32), (16,16)))
+zero = Entity(logger, rendering.getSprite(4,1), pygame.Rect((32, 32), (16,16)))
 characters.append(zero)
-zero.updateComponent(AIComponent.name, AIComponent())
+zero.updateComponent(AIComponent.name, DummyAIComponent())
 zero.updateComponent(MonsterCollisionComponent.name, MonsterCollisionComponent())
+zero.updateComponent(StatComponent.name, StatComponent())
 
 rendering.add2SpriteList(zero)
 
@@ -53,13 +58,27 @@ dy = 0
 physics = PhysicsSystem(sprites)
 
 rendering.createBorder()
-rendering.render()
+rendering.render(player)
+
+keyHeld = False
+
+def gameUpdate(dx, dy):
+    player.getComponent("ai").setMovement(dx, dy)
+
+    for character in characters:
+        character.getComponent("ai").update()
+        character.update()
+        physics.handleCollisions(character)
+
+    rendering.render(player)
 
 while 1:
+
     for event in pygame.event.get():
         if event.type == QUIT:
             quit()
         elif event.type == KEYDOWN:
+            keyHeld = True
             if event.key == K_UP:
                 dx = 0
                 dy = -16
@@ -72,11 +91,15 @@ while 1:
             elif event.key == K_LEFT:
                 dx = -16
                 dy = 0
-            player.getComponent("ai").setMovement(dx, dy)
+            elif event.key == K_k:
+                player.logMessage( ((255, 0,0), "I pressed 'K'! :)") )
+            elif event.key == K_j:
+                player.logMessage( ( (0,255,0), "I pressed 'J'! :)") )
+            
+            gameUpdate(dx, dy)
+        elif event.type == KEYUP:
+            keyHeld = False 
 
-            for character in characters:
-                character.getComponent("ai").update()
-                character.update()
-                physics.handleCollisions(character)
-                
-            rendering.render()
+
+
+
